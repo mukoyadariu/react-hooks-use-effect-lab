@@ -1,32 +1,41 @@
-import React, { useState } from "react";
-
-function Question({ question, onAnswered }) {
+const Question = ({ question, answers, correctAnswer, onAnswered }) => {
+  // State to hold the time remaining for the countdown timer
   const [timeRemaining, setTimeRemaining] = useState(10);
 
-  // add useEffect code
+  // Function to handle the countdown timer
+  const handleCountdown = () => {
+    // Decrease the time remaining by 1 every 1 second
+    const timer = setTimeout(() => {
+      setTimeRemaining((prevTime) => prevTime - 1);
+    }, 1000);
 
-  function handleAnswer(isCorrect) {
-    setTimeRemaining(10);
-    onAnswered(isCorrect);
-  }
+    // When timeRemaining reaches 0, reset it to 10 seconds and trigger onAnswered(false)
+    if (timeRemaining === 0) {
+      setTimeRemaining(10);
+      onAnswered(false);
+    }
 
-  const { id, prompt, answers, correctIndex } = question;
+    // Cleanup function to clear the timer when the component unmounts or timeRemaining changes
+    return () => clearTimeout(timer);
+  };
+
+  // Set up the countdown timer using useEffect
+  useEffect(() => {
+    // Start the countdown when the component mounts or when timeRemaining changes
+    handleCountdown();
+  }, [timeRemaining]);
 
   return (
-    <>
-      <h1>Question {id}</h1>
-      <h3>{prompt}</h3>
-      {answers.map((answer, index) => {
-        const isCorrect = index === correctIndex;
-        return (
-          <button key={answer} onClick={() => handleAnswer(isCorrect)}>
-            {answer}
-          </button>
-        );
-      })}
-      <h5>{timeRemaining} seconds remaining</h5>
-    </>
+    <div>
+      <h1>{question}</h1>
+      <ul>
+        {answers.map((answer, index) => (
+          <li key={index}>{answer}</li>
+        ))}
+      </ul>
+      <p>Time Remaining: {timeRemaining} seconds</p>
+    </div>
   );
-}
+};
 
 export default Question;
